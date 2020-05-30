@@ -1,5 +1,3 @@
-# -*- coding: UTF-8 -*-
-from mysql import connector
 from flask import g, current_app
 
 
@@ -17,5 +15,5 @@ def get_db(prefix="mysql"):
     if not hasattr(g, "mysql_db"):
         g.mysql_dbs = dict()
     if prefix not in g.mysql_dbs:
-        g.mysql_dbs[prefix] = current_app.connection_pool.get_connection()
+        g.mysql_dbs[prefix] = current_app.connection_pool.get(prefix).get_connection()
     return g.mysql_dbs.get(prefix)

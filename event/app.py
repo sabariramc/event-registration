@@ -1,9 +1,10 @@
-from flask import Flask, send_from_directory, jsonify, url_for, g, current_app
+from flask import Flask, send_from_directory, jsonify, url_for, current_app, Blueprint
 import os
 from mysql.connector.pooling import MySQLConnectionPool
 
 from . import settings
 from .model import teardown_request as db_connection_teardown_request
+from .handler import api
 
 
 class Event(Flask):
@@ -18,11 +19,26 @@ class Event(Flask):
         self.connection_pool = {}
 
     def create_connection_pool(self, prefix="mysql", **connect_args):
-        self.connection_pool = MySQLConnectionPool(
+        key_prefix = prefix.upper()
+        db_config = {
+            "host": connect_args.get("host", self.config.get(f"{key_prefix}_DATABASE_HOST", "localhost")),
+            "port": connect_args.get("port", self.config.get(f"{key_prefix}_DATABASE_PORT", 3306)),
+            "database": connect_args.get("database", self.config.get(f"{key_prefix}_DATABASE_NAME", "")),
+            "user": connect_args.get("user", self.config.get(f"{key_prefix}_DATABASE_USER", "")),
+            "password": connect_args.get("password", self.config.get(f"{key_prefix}_DATABASE_PASSWORD", "")),
+            "charset": connect_args.get("charset", self.config.get(f"{key_prefix}_DATABASE_CHARSET", "utf-8")),
+            "use_unicode": True,
+            "get_warnings": True,
+            "ssl_verify_cert": connect_args.get("ssl_verify_cert",
+                                                self.config.get(f"{key_prefix}_DATABASE_SSL_VERIFY_CERT", False)),
+            "ssl_ca": connect_args.get("ssl_ca", self.config.get(f"{key_prefix}_DATABASE_SSL_PATH", True)),
+        }
+        self.connection_pool[prefix] = MySQLConnectionPool(
             pool_name=prefix,
-            pool_reset_session=True,
-            pool_size=10,
-            **connect_args
+            pool_reset_session=connect_args.get("pool_reset_session",
+                                                self.config.get(f"{key_prefix}_DATABASE_POOL_RESET_SESSION", True)),
+            pool_size=connect_args.get("pool_size", self.config.get(f"{key_prefix}_DATABASE_POOL_SIZE", 10)),
+            **db_config
         )
 
     # def __del__(self):
@@ -63,6 +79,9 @@ def create_app():
     app.add_url_rule('/<path:path>', 'app_client', serve)
     app.add_url_rule('/', 'app_index', serve)
     app.add_url_rule('/site-map', 'site_map', site_map)
-    app.create_connection_pool()
-    app.teardown_appcontext(db_connection_teardown_request)
+    # app.create_connection_pool()
+    # app.teardown_appcontext(db_connection_teardown_request)
+    bp = Blueprint("api", __name__)
+    api.init_app(bp)
+    app.register_blueprint(bp, url_prefix="/event/api")
     return app

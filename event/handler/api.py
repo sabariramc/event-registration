@@ -8,12 +8,12 @@ Date : 30-May-2020
 from flask_restx import Api
 
 from .admin import Admin
-from .registration import Registration, RegistrationList
+from .registration import *
 
 api = Api(version='1.0', title='API',
           description='API for event registration')
 admin_ns = api.namespace(name="Admin API", path="/admin")
-registration_ns = api.namespace(name="User API", path="/registration")
+api.add_namespace(registration_ns, path="/registration")
 
 admin_ns.add_resource(Admin, "")
 

@@ -19,7 +19,6 @@ class Event(Flask):
         })
         super(Event, self).__init__(__name__, *args, **kwargs)
         self.connection_pool = None
-        self.dynamic_asset_path = None
         self.enums = None
 
     def create_connection_pool(self):
@@ -35,7 +34,8 @@ class Event(Flask):
             "ssl_verify_cert": False,
             "pool_name": self.__class__.__name__,
             "pool_reset_session": settings.EVENT_MYSQL_DATABASE_POOL_RESET_SESSION,
-            "pool_size": settings.EVENT_MYSQL_DATABASE_POOL_SIZE
+            "pool_size": settings.EVENT_MYSQL_DATABASE_POOL_SIZE,
+            "autocommit": True
         }
         if settings.EVENT_MYSQL_DATABASE_SSL_VERIFY_CERT:
             pool_config["ssl_verify_cert"] = True
@@ -72,9 +72,9 @@ class Event(Flask):
 def create_app():
     app = Event()
     app.config["SERVER_NAME"] = settings.EVENT_FLASK_SERVER
-    app.dynamic_asset_path = settings.EVENT_ASSET_MEDIA_FOLDER
-    if os.path.isdir(app.dynamic_asset_path) is False:
-        os.makedirs(app.dynamic_asset_path)
+    app.config["UPLOAD_FOLDER"] = settings.EVENT_ASSET_MEDIA_FOLDER
+    if os.path.isdir(settings.EVENT_ASSET_MEDIA_FOLDER) is False:
+        os.makedirs(settings.EVENT_ASSET_MEDIA_FOLDER)
     app.create_connection_pool()
     app.load_enums()
     app.teardown_appcontext(db_connection_teardown_request)

@@ -6,7 +6,7 @@ from .connection import get_db
 from .helper import get_json_serialized_obj
 
 
-def execute_sql_statement(sql_stmt: str, parameters: dict = None, is_insert=False):
+def execute_sql_statement(sql_stmt: str, parameters: dict = None, is_insert=False, sql_cnx=None):
     """
     To execute a sql statement. Internally used by update and insert record functions
     the parameters can be of any python supported type (int,float,Decimal,dict,list,date,datetime,....)
@@ -23,7 +23,7 @@ def execute_sql_statement(sql_stmt: str, parameters: dict = None, is_insert=Fals
                 parameters[key] = json.dumps(serialized_obj)
     out = []
     st = time.time()
-    cnx = get_db()
+    cnx = sql_cnx if sql_cnx else get_db()
     p_cur = cnx.cursor()
     try:
         ret_value = p_cur.execute(sql_stmt, parameters)

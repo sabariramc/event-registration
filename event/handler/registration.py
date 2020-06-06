@@ -5,7 +5,7 @@ Author : sabariram
 Date : 30-May-2020
 """
 
-from flask import request
+from flask import request, current_app
 from flask_restful import Resource
 
 from ..dbhandler import execute_sql_statement
@@ -31,9 +31,19 @@ class RegistrationList(Resource):
     def post(self):
         form_data = request.form
         id_data = request.files.get("file")
-        file_data = id_data.read()
+        full_name = form_data.get("full_name")
+        mobile_number = form_data.get("mobile_number")
+        email_address = form_data.get("email_address")
+        registration_type_code = form_data.get("registration_type")
+        no_of_tickets = form_data.get("n_of_types")
         print(form_data)
         return ""
+
+
+class RegistrationType(Resource):
+
+    def get(self):
+        return current_app.registration_type
 
 
 class Registration(Resource):

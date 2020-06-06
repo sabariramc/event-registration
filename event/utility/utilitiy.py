@@ -23,12 +23,3 @@ def json_serializer(obj):
     else:
         jsonEncoder = json.JSONEncoder()
         return jsonEncoder.default(obj)
-
-
-def get_json_serialized_obj(obj):
-    """
-    Provide json compatible object
-    :param obj: dict/list object
-    :return: json compatible object
-    """
-    return json.loads(json.dumps(obj, default=json_serializer))

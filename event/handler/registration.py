@@ -8,7 +8,6 @@ Date : 30-May-2020
 from datetime import date
 from uuid import uuid4
 import os
-from .utilitiy import get_json_serialized_obj
 
 from flask import request, current_app
 from flask_restful import Resource
@@ -30,7 +29,7 @@ class RegistrationList(Resource):
         sql = f"{sql} LIMIT {per_page} OFFSET {(page_no - 1) * per_page}"
         return {
             "count": count
-            , "data": get_json_serialized_obj(execute_sql_statement(sql, parameters=filter_params))
+            , "data": execute_sql_statement(sql, parameters=filter_params)
         }
 
     def post(self):
@@ -76,6 +75,6 @@ class Registration(Resource):
     def get(self, user_id):
         data = execute_sql_statement(sql_get_registration, parameters={"reg_uuid": user_id})
         if data:
-            return get_json_serialized_obj(data[0])
+            return data[0]
         else:
             return "Not Found", 404

@@ -71,10 +71,9 @@ class Event(Flask):
 
 def create_app():
     app = Event()
-    app.config["SERVER_NAME"] = settings.EVENT_FLASK_SERVER
-    app.config["UPLOAD_FOLDER"] = settings.EVENT_ASSET_MEDIA_FOLDER
-    if os.path.isdir(settings.EVENT_ASSET_MEDIA_FOLDER) is False:
-        os.makedirs(settings.EVENT_ASSET_MEDIA_FOLDER)
+    app.config.from_pyfile("settings/config.py")
+    if os.path.isdir(app.config["UPLOAD_FOLDER"]) is False:
+        os.makedirs(app.config["UPLOAD_FOLDER"])
     app.create_connection_pool()
     app.load_enums()
     app.teardown_appcontext(db_connection_teardown_request)

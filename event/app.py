@@ -61,6 +61,7 @@ class Event(Flask):
         enum_type_tuple = namedtuple("ENUM", enum_obj_map.keys())
         self.enums = enum_type_tuple(**enum_obj_map)
         cnx.close()
+
     # def __del__(self):
     #     try:
     #         self.connection_pool._remove_connections()

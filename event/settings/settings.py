@@ -3,6 +3,8 @@ import os
 from .helper import fix_assets_path
 
 STATIC_ASSETS_PATH = fix_assets_path(os.environ.get("EVENT_FIXED_ASSET_PATH", "../client/build"))
+EVENT_ASSET_MEDIA_FOLDER = os.environ.get("EVENT_ASSET_MEDIA_FOLDER", fix_assets_path("../dynamic_asset"))
+EVENT_FLASK_SERVER = os.environ.get("FLASK_SERVER_NAME", None)
 EVENT_MYSQL_DATABASE_HOST = os.environ.get("EVENT_MYSQL_DATABASE_HOST", "localhost")
 EVENT_MYSQL_DATABASE_PORT = os.environ.get("EVENT_MYSQL_DATABASE_PORT", 3306)
 EVENT_MYSQL_DATABASE_NAME = os.environ.get("EVENT_MYSQL_DATABASE_NAME", "")

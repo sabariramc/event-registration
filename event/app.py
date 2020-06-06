@@ -1,10 +1,10 @@
-from flask import Flask, send_from_directory, jsonify, url_for, current_app, Blueprint
+from flask import Flask
 import os
 from mysql.connector.pooling import MySQLConnectionPool
 
 from . import settings
 from .dbhandler import teardown_request as db_connection_teardown_request
-from .handler import api
+from .handler import *
 
 
 class Event(Flask):
@@ -17,6 +17,7 @@ class Event(Flask):
         })
         super(Event, self).__init__(__name__, *args, **kwargs)
         self.connection_pool = None
+        self.dynamic_asset_path = None
 
     def create_connection_pool(self):
         pool_config = {
@@ -46,39 +47,14 @@ class Event(Flask):
     #     super(Event, self).__del__()
 
 
-def has_no_empty_params(rule):
-    defaults = rule.defaults if rule.defaults is not None else ()
-    arguments = rule.arguments if rule.arguments is not None else ()
-    return len(defaults) >= len(arguments)
-
-
-def site_map():
-    links = []
-    for rule in current_app.url_map.iter_rules():
-        # Filter out rules we can't navigate to in a browser
-        # and rules that require parameters
-        if "GET" in rule.methods and has_no_empty_params(rule):
-            url = url_for(rule.endpoint, **(rule.defaults or {}))
-            links.append((url, rule.endpoint))
-    # links is now a list of url, endpoint tuples
-    return jsonify(links)
-
-
-def serve(path=""):
-    if path != "" and os.path.exists(current_app.static_folder + '/' + path):
-        return send_from_directory(current_app.static_folder, path)
-    else:
-        return send_from_directory(current_app.static_folder, 'index.html')
-
-
 def create_app():
     app = Event()
-    app.add_url_rule('/<path:path>', 'app_client', serve)
-    app.add_url_rule('/', 'app_index', serve)
-    app.add_url_rule('/site-map', 'site_map', site_map)
+    app.config["SERVER_NAME"] = settings.EVENT_FLASK_SERVER
+    app.dynamic_asset_path = settings.EVENT_ASSET_MEDIA_FOLDER
+    if os.path.isdir(app.dynamic_asset_path) is False:
+        os.makedirs(app.dynamic_asset_path)
     app.create_connection_pool()
     app.teardown_appcontext(db_connection_teardown_request)
-    bp = Blueprint("api", __name__)
-    api.init_app(bp)
-    app.register_blueprint(bp, url_prefix="/event/api")
+    app.register_blueprint(api_blueprint)
+    app.register_blueprint(helper_blueprint)
     return app

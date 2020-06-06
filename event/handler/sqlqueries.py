@@ -13,4 +13,8 @@ SELECT enum_value, enum_name, enum_code
 FROM c_enum
 WHERE enum_type_code = 'REGISTRATION_TYPE'
 ) ce ON registration_type = enum_value
-{}  """
+%s"""
+
+sql_count_wrapper = """
+SELECT COUNT(*) AS cnt
+FROM (%s)x"""

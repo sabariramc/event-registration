@@ -3,7 +3,7 @@ import time
 
 from .connection import get_db
 
-from .helper import get_json_serialized_obj
+from ..utility import get_json_serialized_obj
 
 
 def execute_sql_statement(sql_stmt: str, parameters: dict = None, is_insert=False, sql_cnx=None):

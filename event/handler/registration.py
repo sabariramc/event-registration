@@ -67,7 +67,7 @@ class RegistrationList(Resource):
 class RegistrationType(Resource):
 
     def get(self):
-        return current_app.registration_type
+        return current_app.enums.REGISTRATION_TYPE._asdict()
 
 
 class Registration(Resource):

@@ -12,6 +12,7 @@ from .registration import *
 api = Api()
 api.add_resource(RegistrationList, "/registration")
 api.add_resource(Registration, "/registration/<user_id>")
+api.add_resource(RegistrationType, "/registration/config")
 
 bp = Blueprint("api", __name__, url_prefix="/event/api")
 api.init_app(bp)

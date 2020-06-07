@@ -75,6 +75,8 @@ def create_app():
     app.config.from_pyfile("settings/config.py")
     if os.path.isdir(app.config["UPLOAD_FOLDER"]) is False:
         os.makedirs(app.config["UPLOAD_FOLDER"])
+    if app.config.get("DEBUG"):
+        pass
     app.create_connection_pool()
     app.load_enums()
     app.teardown_appcontext(db_connection_teardown_request)

@@ -32,3 +32,20 @@ def get_json_serialized_obj(obj):
     :return: json compatible object
     """
     return json.loads(json.dumps(obj, default=json_serializer))
+
+
+def is_non_empty_value(value):
+    """
+    To check if the value is not None and in case of string check for non empty string
+    :param value: Any basic data type
+    :return:Boolean
+    """
+    if value is None:
+        return False
+    if isinstance(value, str) and len(value.strip()) == 0:
+        return False
+    if isinstance(value, list) and not value:
+        return False
+    if isinstance(value, dict) and not value:
+        return False
+    return True

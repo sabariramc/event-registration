@@ -14,6 +14,7 @@ from flask_restful import Resource
 
 from ..dbhandler import execute_sql_statement
 from .sqlqueries import *
+from ..exceptions import *
 
 
 class RegistrationList(Resource):
@@ -49,7 +50,7 @@ class RegistrationList(Resource):
         }
         de_dup_check = execute_sql_statement(sql_check_registration, parameters=insert_data)[0].get("cnt")
         if de_dup_check:
-            return "Mobile number/ email address already in use", 409
+            raise HTTPExceptionConflict("Mobile number/ email address already in use")
         insert_data["reg_uuid"] = uuid4().hex
         file_ext = file.filename.split(".")[-1]
         path = os.path.join(current_app.config['UPLOAD_FOLDER'], insert_data.get("reg_uuid"))

@@ -76,7 +76,8 @@ def create_app():
     if os.path.isdir(app.config["UPLOAD_FOLDER"]) is False:
         os.makedirs(app.config["UPLOAD_FOLDER"])
     if app.config.get("DEBUG"):
-        pass
+        from flask_cors import CORS
+        CORS(app)
     app.create_connection_pool()
     app.load_enums()
     app.teardown_appcontext(db_connection_teardown_request)

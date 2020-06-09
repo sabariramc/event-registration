@@ -77,6 +77,34 @@ def parse_request(query_param_definition=None, form_definition=None, json_defini
     return inner_get_fu
 
 
+def parse_args(query_param_definition):
+    def inner_get_fu(fu):
+        return parse_request(query_param_definition=query_param_definition)(fu)
+
+    return inner_get_fu
+
+
+def parse_form(form_definition):
+    def inner_get_fu(fu):
+        return parse_request(form_definition=form_definition)(fu)
+
+    return inner_get_fu
+
+
+def parse_json(json_definition):
+    def inner_get_fu(fu):
+        return parse_request(json_definition=json_definition)(fu)
+
+    return inner_get_fu
+
+
+def parse_file(files_definition):
+    def inner_get_fu(fu):
+        return parse_request(files_definition=files_definition)(fu)
+
+    return inner_get_fu
+
+
 class BaseParam:
     def __init__(self, data_type):
         self.data_type = data_type

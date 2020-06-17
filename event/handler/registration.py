@@ -42,7 +42,7 @@ class RegistrationList(Resource):
             , "registration_type": {"name": str, "required": True}
             , "no_of_ticket": {"name": int, "required": True}
         }
-        , files_definition={"id_card_file": {"name": FileParam(mimetype="image"), "required": True}}
+        , files_definition={"id_card_file": {"name": FileParam(mime_type="image"), "required": True}}
     )
     def post(self, id_card_file, full_name, mobile_number, email_address, no_of_ticket, registration_type):
         registration_type_map = current_app.enums.REGISTRATION_TYPE._asdict()

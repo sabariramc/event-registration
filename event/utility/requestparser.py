@@ -28,7 +28,7 @@ class ParamValidator:
         def role_checker(*args, **kwargs):
             function_argument = {}
             if self.query_param_definition:
-                function_argument.update(self.parser(request.args, self.query_param_definition))
+                function_argument.update(self.parser(self.get_normalize_query_params(), self.query_param_definition))
             if self.form_definition:
                 function_argument.update(self.parser(request.form, self.form_definition))
             if self.json_definition:
@@ -60,20 +60,18 @@ class ParamValidator:
     def parse_value(cls, key, value, data_type, min_val=None, max_val=None, allowed_value_list=None, regex=None,
                     nested=False, sub_item_data_type=None, nested_data_definition=None):
         try:
-            val = data_type(value)
+            val = cls.type_converter(value, data_type)
         except Exception:
             raise HTTPExceptionBadRequest(f"{key} should be of type {data_type}")
         if nested:
-            if sub_item_data_type:
-                temp_list = []
-                for item in val:
+            if sub_item_data_type and isinstance(val, list):
+                for i, item in enumerate(val):
                     try:
-                        list_item = sub_item_data_type(item)
-                        temp_list.append(list_item)
+                        list_item = cls.type_converter(item, sub_item_data_type)
+                        val[i] = list_item
                     except Exception:
                         raise HTTPExceptionBadRequest(f"{key} should be of {data_type} of {sub_item_data_type}")
                     cls.check_value_range(list_item, key, min_val, max_val, allowed_value_list, regex)
-                val = temp_list
             elif nested_data_definition:
                 if data_type is dict:
                     val = cls.parser(val, nested_data_definition, key)
@@ -101,6 +99,19 @@ class ParamValidator:
     @staticmethod
     def validate_type_definition(type_definition):
         return type_definition
+
+    @staticmethod
+    def get_normalize_query_params():
+        params_non_flat = request.args.to_dict(flat=False)
+        return {key: value if len(value) > 1 else value[0] for key, value in params_non_flat.items()}
+
+    @staticmethod
+    def type_converter(value, data_type):
+        if isinstance(data_type, BaseParam) and isinstance(value, data_type.data_type) is False:
+            value = data_type(value)
+        elif isinstance(value, data_type) is False:
+            value = data_type(value)
+        return value
 
 
 def parse_request(query_param_definition=None, form_definition=None, json_definition=None, files_definition=None):
@@ -131,9 +142,9 @@ def parse_json(json_definition):
     return inner_get_fu
 
 
-def parse_file(files_definition):
+def parse_file(file_definition):
     def inner_get_fu(fu):
-        return parse_request(files_definition=files_definition)(fu)
+        return parse_request(files_definition=file_definition)(fu)
 
     return inner_get_fu
 
@@ -141,6 +152,9 @@ def parse_file(files_definition):
 class BaseParam:
     def __init__(self, data_type):
         self.data_type = data_type
+
+    def __call__(self, value):
+        raise NotImplemented
 
     def __repr__(self):
         return str(self.data_type)
@@ -167,18 +181,19 @@ class DecimalParam(BaseParam):
 
 
 class FileParam(BaseParam):
-    def __init__(self, mimetype=None):
-        self.mimetype = mimetype
-        super().__init__(data_type="File Stream")
+    def __init__(self, mime_type=None, extension_list=None):
+        self.mime_type = mime_type
+        self.extension_list = extension_list
+        super().__init__(data_type="File Stream Object")
 
     def __call__(self, value):
-        if self.mimetype:
-            file_mime_type = value.mimetype
-            if file_mime_type.startswith(self.mimetype) is False:
+        if self.mime_type:
+            file_mime_type = value.mime_type
+            if file_mime_type.startswith(self.mime_type) is False:
                 raise Exception()
         return value
 
     def __repr__(self):
-        if self.mimetype:
-            return f"{str(self.data_type)} and file type should be '{self.mimetype}'"
+        if self.mime_type:
+            return f"{str(self.data_type)} and file type should be '{self.mime_type}'"
         super(FileParam, self).__repr__()

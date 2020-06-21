@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import { render } from 'react-dom';
+import ReactDOM from "react-dom";
+import { hot } from "react-hot-loader/root";
 
 class Home extends Component {
     render() {
@@ -7,4 +8,6 @@ class Home extends Component {
     }
 }
 
-render(<Home />, document.getElementById('container'));
+const render = (Component) => ReactDOM.render(<Home />, document.getElementById('container'));
+
+render(hot(Home))

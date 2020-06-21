@@ -74,7 +74,8 @@ class RegistrationList(Resource):
 class RegistrationType(Resource):
 
     def get(self):
-        return current_app.enums.REGISTRATION_TYPE._asdict()
+        registration_type = current_app.enums.REGISTRATION_TYPE._asdict()
+        return [{"key": key, "name": value[1]} for key, value in registration_type.items()]
 
 
 class Registration(Resource):

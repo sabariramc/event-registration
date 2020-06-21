@@ -37,8 +37,6 @@ def execute_sql_statement(sql_stmt: str, parameters: dict = None, is_insert=Fals
                 if ret_value == -1:
                     out = []
         rows_affected = p_cur.rowcount
-    except Exception:
-        raise
     finally:
         p_cur.close()
     execution_time = time.time() - st

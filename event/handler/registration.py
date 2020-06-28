@@ -22,6 +22,14 @@ from ..utility import *
 from ..constants import REGISTRATION_TYPE_LIST
 
 
+def map_temp_file(temp_file_name):
+    file_name = secure_filename(temp_file_name)
+    current_path = os.path.join(current_app.config['TEMP_FOLDER'], file_name)
+    if not os.path.isfile(current_path):
+        return False, 'File not found'
+    return True, current_path
+
+
 class RegistrationList(Resource):
 
     def get(self):
@@ -44,11 +52,11 @@ class RegistrationList(Resource):
         , "email_address": {"data_type": str, "required": True,
                             "regex": r"^[a-zA-Z0-9_.]+@[a-zA-Z0-9]+(\.[a-zA-Z0-9]+)+$"}
         , "registration_type": {"data_type": str, "required": True, 'allowed_value_list': REGISTRATION_TYPE_LIST}
-        , "no_of_ticket": {"data_type": int, "required": True}
-        , "id_card_file": {"data_type": str, "required": True}}
-    )
+        , "no_of_ticket": {"data_type": int, "required": True, 'min': 1}
+        , "id_card_file": {"data_type": str, "required": True, 'validator': map_temp_file}
+    })
     def post(self, id_card_file, name, mobile_number, email_address, no_of_ticket, registration_type):
-        registration_type_map   = current_app.enums.REGISTRATION_TYPE._asdict()
+        registration_type_map = current_app.enums.REGISTRATION_TYPE._asdict()
         insert_data = {
             "full_name": name
             , "mobile_number": mobile_number
@@ -61,16 +69,12 @@ class RegistrationList(Resource):
         if de_dup_check:
             raise HTTPExceptionConflict("Mobile number/ email address already in use")
         insert_data["reg_uuid"] = uuid4().hex
-        file_name = secure_filename(id_card_file)
-        file_ext = file_name.split(".")[-1]
-        current_path = os.path.join(current_app.config['TEMP_FOLDER'], file_name)
-        if not os.path.isfile(current_path):
-            raise HTTPExceptionBadRequest('Invalid File Path')
+        file_ext = id_card_file.split(".")[-1]
         file_name = f"id_card.{file_ext}"
         path = os.path.join(current_app.config['UPLOAD_FOLDER'], insert_data.get("reg_uuid"))
         os.mkdir(path)
         destination_path = os.path.join(path, file_name)
-        shutil.move(current_path, destination_path)
+        shutil.move(id_card_file, destination_path)
         insert_data["id_card_path"] = os.path.join(insert_data["reg_uuid"], file_name)
         execute_sql_statement(sql_create_registration, parameters=insert_data, is_insert=True)
         return {

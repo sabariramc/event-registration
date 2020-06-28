@@ -17,7 +17,9 @@ from ..exceptions import *
 
 
 class ParamValidator:
-    def __init__(self, query_param_definition=None, form_definition=None, json_definition=None, files_definition=None):
+    def __init__(self, query_param_definition=None, form_definition=None, json_definition=None, files_definition=None,
+                 is_strict=True):
+        self.is_strict = is_strict
         self.query_param_definition = self.validate_type_definition(query_param_definition)
         self.form_definition = self.validate_type_definition(form_definition)
         self.json_definition = self.validate_type_definition(json_definition)
@@ -40,55 +42,66 @@ class ParamValidator:
 
         return role_checker
 
-    @classmethod
-    def parser(cls, params, definition, parent=None):
+    def parser(self, params, definition, parent=None):
         if is_non_empty_value(params) is False:
             params = {}
         validated_params = {}
+        params = dict(params)
         for key, type_def in definition.items():
-            value = params.get(key)
+            value = params.pop(key, None)
             required = type_def.pop("required", False)
             try:
                 print_key = f"{parent}.{key}" if parent else key
                 if is_non_empty_value(value):
-                    validated_params[key] = cls.parse_value(print_key, value, **type_def)
+                    validated_params[key] = self.parse_value(print_key, value, **type_def)
                 elif required:
                     raise HTTPExceptionBadRequest(f"{print_key} should not be empty")
             finally:
                 type_def["required"] = required
+        if self.is_strict and is_non_empty_value(params):
+            raise HTTPExceptionBadRequest(f'Unexpected params {list(params.keys())}')
         return validated_params
 
     @classmethod
     def parse_value(cls, key, value, data_type, min_val=None, max_val=None, allowed_value_list=None, regex=None,
-                    nested=False, sub_item_data_type=None, nested_data_definition=None):
+                    nested=False, sub_item_data_type=None, nested_data_definition=None, length=None, validator=None):
         try:
-            val = cls.type_converter(value, data_type)
+            value = cls.type_converter(value, data_type)
         except Exception:
             raise HTTPExceptionBadRequest(f"{key} should be of type {data_type}")
+        if validator:
+            is_valid, error = validator(value)
+            if is_valid:
+                if error is not None:
+                    value = error
+            else:
+                raise HTTPExceptionBadRequest(f"{key} is not valid - {error}")
+
         if nested:
-            if sub_item_data_type and isinstance(val, list):
-                for i, item in enumerate(val):
+            if sub_item_data_type and isinstance(value, list):
+                for i, item in enumerate(value):
                     try:
                         list_item = cls.type_converter(item, sub_item_data_type)
-                        val[i] = list_item
+                        value[i] = list_item
                     except Exception:
                         raise HTTPExceptionBadRequest(f"{key} should be of {data_type} of {sub_item_data_type}")
-                    cls.check_value_range(list_item, key, min_val, max_val, allowed_value_list, regex)
+                    cls.check_value_constraint(list_item, key, min_val, max_val, allowed_value_list, regex, length)
             elif nested_data_definition:
                 if data_type is dict:
-                    val = cls.parser(val, nested_data_definition, key)
+                    value = cls.parser(value, nested_data_definition, key)
                 elif data_type is list:
                     temp_list = []
-                    for item in val:
+                    for item in value:
                         list_item = cls.parser(item, nested_data_definition, key)
                         temp_list.append(list_item)
-                    val = temp_list
+                    value = temp_list
         else:
-            cls.check_value_range(val, key, min_val, max_val, allowed_value_list, regex)
-        return val
+            cls.check_value_constraint(value, key, min_val, max_val, allowed_value_list, regex, length)
+        return value
 
     @staticmethod
-    def check_value_range(value, key, min_val=None, max_val=None, allowed_value_list=None, regex=None):
+    def check_value_constraint(value, key, min_val=None, max_val=None, allowed_value_list=None, regex=None,
+                               length=None):
         if min_val and value < min_val:
             raise HTTPExceptionBadRequest(f"{key} should be greater than or equal to {min_val}")
         if max_val and value > max_val:
@@ -97,6 +110,8 @@ class ParamValidator:
             raise HTTPExceptionBadRequest(f"{key} should be one of these - {allowed_value_list}")
         if regex and re.search(regex, value) is None:
             raise HTTPExceptionBadRequest(f"{key} should be of format - {regex}")
+        if length and length > len(value):
+            raise HTTPExceptionBadRequest(f"{key} cannot exceed the length of - {length}")
 
     @staticmethod
     def validate_type_definition(type_definition):
@@ -116,37 +131,38 @@ class ParamValidator:
         return value
 
 
-def parse_request(query_param_definition=None, form_definition=None, json_definition=None, files_definition=None):
+def parse_request(query_param_definition=None, form_definition=None, json_definition=None, files_definition=None,
+                  is_strict=True):
     def inner_get_fu(fu):
-        return ParamValidator(query_param_definition, form_definition, json_definition, files_definition)(fu)
+        return ParamValidator(query_param_definition, form_definition, json_definition, files_definition, is_strict)(fu)
 
     return inner_get_fu
 
 
-def parse_request_args(query_param_definition):
+def parse_request_args(query_param_definition, is_strict=True):
     def inner_get_fu(fu):
-        return parse_request(query_param_definition=query_param_definition)(fu)
+        return parse_request(query_param_definition=query_param_definition, is_strict=is_strict)(fu)
 
     return inner_get_fu
 
 
-def parse_request_form(form_definition):
+def parse_request_form(form_definition, is_strict=True):
     def inner_get_fu(fu):
-        return parse_request(form_definition=form_definition)(fu)
+        return parse_request(form_definition=form_definition, is_strict=is_strict)(fu)
 
     return inner_get_fu
 
 
-def parse_request_json(json_definition):
+def parse_request_json(json_definition, is_strict=True):
     def inner_get_fu(fu):
-        return parse_request(json_definition=json_definition)(fu)
+        return parse_request(json_definition=json_definition, is_strict=is_strict)(fu)
 
     return inner_get_fu
 
 
-def parse_request_file(file_definition):
+def parse_request_file(file_definition, is_strict=True):
     def inner_get_fu(fu):
-        return parse_request(files_definition=file_definition)(fu)
+        return parse_request(files_definition=file_definition, is_strict=is_strict)(fu)
 
     return inner_get_fu
 
@@ -162,12 +178,28 @@ class BaseParam:
         return str(self.data_type)
 
 
+class DateTimeParam(BaseParam):
+    def __init__(self, fmt_string):
+        self.fmt_string = fmt_string
+        super().__init__(data_type=datetime)
+
+    def __call__(self, value):
+        if value is None:
+            return datetime.now()
+        return datetime.strptime(value, self.fmt_string)
+
+    def __repr__(self):
+        return f"{self.data_type} and format {self.fmt_string}"
+
+
 class DateParam(BaseParam):
     def __init__(self, fmt_string):
         self.fmt_string = fmt_string
         super().__init__(data_type=date)
 
-    def __call__(self, value):
+    def __call__(self, value=None):
+        if value is None:
+            return date.today()
         return datetime.strptime(value, self.fmt_string).date()
 
     def __repr__(self):
@@ -178,7 +210,9 @@ class DecimalParam(BaseParam):
     def __init__(self):
         super().__init__(data_type=Decimal)
 
-    def __call__(self, value):
+    def __call__(self, value=None):
+        if value is None:
+            return Decimal(0)
         return Decimal(str(value))
 
 

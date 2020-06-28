@@ -5,8 +5,12 @@ Author : sabariram
 Date : 30-May-2020
 """
 
+from uuid import uuid4
+from time import time
+
+
 from flask_restful import Api
-from flask import Blueprint
+from flask import Blueprint, jsonify, request
 from .registration import *
 from ..exceptions import HTTPException
 
@@ -27,3 +31,21 @@ api.add_resource(RegistrationType, "/registration/config")
 
 bp = Blueprint("api", __name__, url_prefix="/event/api")
 api.init_app(bp)
+
+
+@bp.route("/upload", methods=["POST"])
+def upload_file():
+    content_type = request.content_type
+    allowed_mime_type = ['image/png', 'image/jpg', 'image/jpeg']
+    if content_type not in allowed_mime_type:
+        return 'Image should be of type PNG, JPG, JPEG', 400
+    extension_map = {
+        'image/png': 'png'
+        , 'image/jpg': 'jpg'
+        , 'image/jpeg': 'jpeg'
+    }
+    file_name = f"{int(time())}_{uuid4().hex}.{extension_map.get(content_type)}"
+    path = os.path.join(current_app.config['TEMP_FOLDER'], file_name)
+    with open(path, 'wb') as fp:
+        fp.write(request.data)
+    return jsonify({"upload_file": file_name})

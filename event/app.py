@@ -8,6 +8,8 @@ from .dbhandler import teardown_request as db_connection_teardown_request
 from .dbhandler import execute_sql_statement
 from .handler import *
 
+from .constants import REGISTRATION_TYPE_LIST
+
 
 class Event(Flask):
 
@@ -61,6 +63,7 @@ class Event(Flask):
         enum_type_tuple = namedtuple("ENUM", enum_obj_map.keys())
         self.enums = enum_type_tuple(**enum_obj_map)
         cnx.close()
+        REGISTRATION_TYPE_LIST.extend(self.enums.REGISTRATION_TYPE._asdict().keys())
 
     # def __del__(self):
     #     try:

@@ -19,6 +19,8 @@ from .sqlqueries import *
 from ..exceptions import *
 from ..utility import *
 
+from ..constants import REGISTRATION_TYPE_LIST
+
 
 class RegistrationList(Resource):
 
@@ -41,12 +43,12 @@ class RegistrationList(Resource):
         , "mobile_number": {"data_type": str, "required": True, 'regex': r'^[0-9]{10}$'}
         , "email_address": {"data_type": str, "required": True,
                             "regex": r"^[a-zA-Z0-9_.]+@[a-zA-Z0-9]+(\.[a-zA-Z0-9]+)+$"}
-        , "registration_type": {"data_type": str, "required": True}
+        , "registration_type": {"data_type": str, "required": True, 'allowed_value_list': REGISTRATION_TYPE_LIST}
         , "no_of_ticket": {"data_type": int, "required": True}
         , "id_card_file": {"data_type": str, "required": True}}
     )
     def post(self, id_card_file, name, mobile_number, email_address, no_of_ticket, registration_type):
-        registration_type_map = current_app.enums.REGISTRATION_TYPE._asdict()
+        registration_type_map   = current_app.enums.REGISTRATION_TYPE._asdict()
         insert_data = {
             "full_name": name
             , "mobile_number": mobile_number

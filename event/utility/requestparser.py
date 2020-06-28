@@ -42,6 +42,8 @@ class ParamValidator:
 
     @classmethod
     def parser(cls, params, definition, parent=None):
+        if is_non_empty_value(params) is False:
+            params = {}
         validated_params = {}
         for key, type_def in definition.items():
             value = params.get(key)
@@ -121,28 +123,28 @@ def parse_request(query_param_definition=None, form_definition=None, json_defini
     return inner_get_fu
 
 
-def parse_args(query_param_definition):
+def parse_request_args(query_param_definition):
     def inner_get_fu(fu):
         return parse_request(query_param_definition=query_param_definition)(fu)
 
     return inner_get_fu
 
 
-def parse_form(form_definition):
+def parse_request_form(form_definition):
     def inner_get_fu(fu):
         return parse_request(form_definition=form_definition)(fu)
 
     return inner_get_fu
 
 
-def parse_json(json_definition):
+def parse_request_json(json_definition):
     def inner_get_fu(fu):
         return parse_request(json_definition=json_definition)(fu)
 
     return inner_get_fu
 
 
-def parse_file(file_definition):
+def parse_request_file(file_definition):
     def inner_get_fu(fu):
         return parse_request(files_definition=file_definition)(fu)
 
@@ -181,17 +183,19 @@ class DecimalParam(BaseParam):
 
 
 class FileParam(BaseParam):
-    def __init__(self, mime_type=None, extension_list=None):
+    def __init__(self, mime_type=None, mime_list=None):
         self.mime_type = mime_type
-        self.extension_list = extension_list
+        self.mime_list = mime_list
         super().__init__(data_type="File Stream Object")
 
-    def __call__(self, value):
+    def __call__(self, file_mime_type):
         if self.mime_type:
-            file_mime_type = value.mime_type
             if file_mime_type.startswith(self.mime_type) is False:
                 raise Exception()
-        return value
+        else:
+            if file_mime_type not in self.mime_list:
+                raise Exception()
+        return file_mime_type
 
     def __repr__(self):
         if self.mime_type:

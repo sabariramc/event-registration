@@ -1,30 +1,23 @@
 import React, { Component } from 'react';
 
-class Select extends Component {
-    constructor(props) {
-        super(props)
-        this.state = { options: [] }
-    }
+import Label from './label';
 
-    componentDidMount() {
-        this.setState({ options: [{ key: "SELF", name: "Self" }] })
-    }
+class Select extends Component {
 
     render() {
-        const { options } = this.state;
-        const { id, name, disbled, displayname } = this.props
+        const { id, name, disabled, options, onChange, label } = this.props
         return (
-            <>
-                <label for={id}>{displayname}</label>
-                <select id={id} name={name} disbled={disbled}>
+            <div>
+                <Label htmlFor={id} >{label}</Label>
+                <select id={id} name={name} disabled={disabled} onChange={onChange}>
                     {
                         options.map(option => (
-                            <option id={options.key}>{option.name}</option>
+                            <option key={option.key}>{option.value}</option>
                         ),
                         )
                     }
                 </select>
-            </>
+            </div>
         );
     }
 }

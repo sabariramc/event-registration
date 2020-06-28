@@ -36,7 +36,10 @@ const config = {
         ]
     },
     plugins: [
-        new webpack.HotModuleReplacementPlugin()
+        new webpack.HotModuleReplacementPlugin(),
+        new webpack.DefinePlugin({
+            'API_URL': '"http://localhost:8888/event/api"'
+        })
     ],
     devServer: {
         host: 'localhost',

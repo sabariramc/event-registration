@@ -6,6 +6,7 @@ import importedComponent from "react-imported-component";
 import Home from './Home';
 import Registration from './Registraion';
 
+
 class App extends Component {
     render() {
         return (

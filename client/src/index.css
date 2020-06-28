@@ -1,8 +1,12 @@
 body {
   padding: 40px;
-  font-family: Arial;
 }
 input {
     width: 20%;
     margin: 5px;
 }
+
+label{
+  padding: 5px;
+  font-size: large;
+} 

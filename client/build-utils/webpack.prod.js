@@ -38,6 +38,9 @@ const config = {
     plugins: [
         new MiniCssExtractPlugin({
             filename: 'styles/styles.[hash].css'
+        }),
+        new webpack.DefinePlugin({
+            'API_URL': 'https://localhost:12001/event/api'
         })
     ]
 };

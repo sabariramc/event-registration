@@ -8,6 +8,7 @@ Date : 06-Jun-2020
 from flask import Blueprint, current_app, url_for, jsonify, send_from_directory
 import os
 
+
 bp = Blueprint("helper", __name__)
 
 
@@ -33,6 +34,7 @@ def site_map():
 @bp.route("/download/<path:filename>", methods=["GET"])
 def download_file(filename):
     return send_from_directory(current_app.config['UPLOAD_FOLDER'], filename)
+
 
 
 @bp.route("/<path:path>")

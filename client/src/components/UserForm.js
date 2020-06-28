@@ -29,7 +29,7 @@ class UserForm extends Component {
         const { no_of_ticket, name, email_address, mobile_number, id_card_file, registration_type, options } = this.state;
         var submit_data = { no_of_ticket, name, email_address, mobile_number, id_card_file };
         for (var i in options) {
-            if (options[i].name === registration_type) {
+            if (options[i].value === registration_type) {
                 submit_data['registration_type'] = options[i].key;
                 break;
             }
@@ -60,7 +60,7 @@ class UserForm extends Component {
     }
 
     render() {
-        const { options, disableNoOfTickets, no_of_ticket, name, email_address, mobile_number, id_card_file, registration_type } = this.state;
+        const { options, disableNoOfTickets, no_of_ticket, name, email_address, mobile_number, registration_type } = this.state;
 
         return (
             <Form onSubmit={this.handleSubmit}>

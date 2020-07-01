@@ -10,7 +10,7 @@ from time import time
 
 
 from flask_restful import Api
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, send_from_directory
 from .registration import *
 from ..exceptions import HTTPException
 
@@ -49,3 +49,13 @@ def upload_file():
     with open(path, 'wb') as fp:
         fp.write(request.data)
     return jsonify({"upload_file": file_name})
+
+
+@bp.route("/download/<path:filename>", methods=["GET"])
+def download_file(filename):
+    return send_from_directory(current_app.config['UPLOAD_FOLDER'], filename)
+
+
+@bp.route("/preview/download/<path:filename>", methods=["GET"])
+def get_temp_file(filename):
+    return send_from_directory(current_app.config['TEMP_FOLDER'], filename)

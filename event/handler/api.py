@@ -11,7 +11,7 @@ from time import time
 
 from flask_restful import Api
 from flask import Blueprint, jsonify, request, send_from_directory
-from .registration import *
+from .registration import * 
 from ..exceptions import HTTPException
 
 

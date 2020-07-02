@@ -41,5 +41,8 @@ async function call(url, body, method, contentType = null) {
         }
     }
     const response = await fetch(url, api_data);
-    return response.json(); // parses JSON response into native JavaScript objects
+    return {
+        status: response.status
+        , data: await response.json()
+    }// parses JSON response into native JavaScript objects
 }

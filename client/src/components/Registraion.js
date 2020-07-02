@@ -9,6 +9,8 @@ import UserPreview from './UserPreview'
 
 import { getData, postData, uploadFile } from "../services";
 
+import { Error } from "../common";
+
 class Registraion extends Component {
 
     constructor(props) {
@@ -26,8 +28,9 @@ class Registraion extends Component {
             , id_card_local_path: ''
             , registration_type: 'Self'
             , preview: false
-            , disableNoOfTickets: true,
-            previewFile: ''
+            , disableNoOfTickets: true
+            , errorMessage: null
+            , previewFile: ''
         }
     }
 
@@ -45,7 +48,7 @@ class Registraion extends Component {
                 break;
             }
         }
-        postData('/registration', submit_data, (data) => console.log('Data', data), (error) => console.error(error))
+        postData('/registration', submit_data, (data) => console.log('Data', data), (error) => this.setState({ preview: false, errorMessage: error.message }))
     }
 
     handlePreview(e) {
@@ -76,13 +79,16 @@ class Registraion extends Component {
     }
 
     render() {
-        const { preview } = this.state;
+        const { preview, errorMessage } = this.state;
         return (
             <div>
                 <Helmet>
                     <title>Registration</title>
                 </Helmet>
                 {preview ? <UserPreview userData={this.state} onSubmit={this.handleSubmit} /> : <UserForm onSubmit={this.handlePreview} userData={this.state} onChange={this.handleChange} />}
+                {
+                    errorMessage != null ? <Error>{errorMessage}</Error> : <span></span>
+                }
             </div>
         )
     }

@@ -35,7 +35,7 @@ class Registraion extends Component {
     }
 
     componentDidMount() {
-        getData('/registration/config', (data) => this.setState({ options: data }))
+        getData('/registration/config', null, (data) => this.setState({ options: data }))
     }
 
     handleSubmit(e) {

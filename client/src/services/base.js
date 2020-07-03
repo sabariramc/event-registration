@@ -1,11 +1,11 @@
 
 export function post(url, body, contentType = "application/json") {
-    var url = new URL(API_URL + url);
+    url = new URL(API_URL + url);
     return call(url, body, 'POST', contentType);
 }
 
 export function get(url, queryParams) {
-    var url = new URL(API_URL + url);
+    url = new URL(API_URL + url);
     if (queryParams != null) {
         url.search = new URLSearchParams(queryParams);
     }
@@ -13,7 +13,7 @@ export function get(url, queryParams) {
 }
 
 export function fileUpload(url, fileData) {
-    var url = new URL(API_URL + url);
+    url = new URL(API_URL + url);
     return call(url, fileData, 'POST');
 }
 

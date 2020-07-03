@@ -1,26 +1,26 @@
 import { post, get, fileUpload } from "./base";
 
 
-function postData(url, data, eventListner, errorHandler = null) {
-    if (errorHandler == null) {
-        errorHandler = eventListner;
-    }
-    post(url, data).then(data => { if (data.status == 200) { eventListner(data.data) } else { errorHandler(data.data) } }).catch(error => console.error(error));
+function postData(url, data, eventListner, eventErrorHandler = null, errorHandler = null) {
+    callAPI(post, url, data, eventListner, eventErrorHandler, errorHandler);
 }
 
-function getData(url, eventListner, queryParams = null, errorHandler = null) {
-    if (errorHandler == null) {
-        errorHandler = eventListner;
-    }
-    get(url, queryParams).then(data => { if (data.status == 200) { eventListner(data.data) } else { errorHandler(data.data) } }).catch(error => console.error(error))
+function getData(url, queryParams, eventListner, eventErrorHandler = null, errorHandler = null) {
+    callAPI(get, url, queryParams, eventListner, eventErrorHandler, errorHandler);
 }
 
-function uploadFile(url, fileData, eventListner, errorHandler = null) {
-    if (errorHandler == null) {
-        errorHandler = eventListner;
-    }
-    fileUpload(url, fileData).then(data => { if (data.status == 200) { eventListner(data.data) } else { errorHandler(data.data) } }).catch(error => console.error(error))
+function uploadFile(url, fileData, eventListner, eventErrorHandler = null, errorHandler = null) {
+    callAPI(fileUpload, url, fileData, eventListner, eventErrorHandler, errorHandler);
 }
 
+function callAPI(apiMethod, url, requestData, eventListner, eventErrorHandler, errorHandler = null) {
+    if (eventErrorHandler == null) {
+        eventErrorHandler = eventListner;
+    }
+    if (errorHandler == null) {
+        errorHandler = error => console.error(error);
+    }
+    apiMethod(url, requestData).then(data => { if (data.status == 200) { eventListner(data.data) } else { eventErrorHandler(data.data) } }).catch(error => errorHandler(error))
+}
 
 export { postData, getData, uploadFile };

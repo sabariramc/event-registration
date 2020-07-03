@@ -9,7 +9,7 @@ class UserForm extends Component {
         return (
             <Form onSubmit={this.props.onSubmit}>
                 <div>
-                    <image src={previewFile} ></image>
+                    <img src={previewFile} ></img>
                 </div>
                 <div>
                     <label>Name:</label><span>{name}</span>

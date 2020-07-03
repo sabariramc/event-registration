@@ -48,11 +48,12 @@ class RegistrationList(Resource):
 
     @parse_request_json({
         "name": {"data_type": str, "required": True, 'regex': r"^[a-zA-Z_']+$"}
-        , "mobile_number": {"data_type": str, "required": True, 'regex': r'^[0-9]{10}$'}
+        , "mobile_number": {"data_type": str, "required": True, 'regex': r'^[0-9]{10}$',
+                            'regex_error_message': 'should be 10 digits'}
         , "email_address": {"data_type": str, "required": True,
                             "regex": r"^[a-zA-Z0-9_.]+@[a-zA-Z0-9]+(\.[a-zA-Z0-9]+)+$"}
         , "registration_type": {"data_type": str, "required": True, 'allowed_value_list': REGISTRATION_TYPE_LIST}
-        , "no_of_ticket": {"data_type": int, "required": True, 'min': 1}
+        , "no_of_ticket": {"data_type": int, "required": True, 'min_val': 1}
         , "id_card_file": {"data_type": str, "required": True, 'validator': map_temp_file}
     })
     def post(self, id_card_file, name, mobile_number, email_address, no_of_ticket, registration_type):

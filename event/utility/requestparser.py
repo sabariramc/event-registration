@@ -64,7 +64,8 @@ class ParamValidator:
 
     @classmethod
     def parse_value(cls, key, value, data_type, min_val=None, max_val=None, allowed_value_list=None, regex=None,
-                    nested=False, sub_item_data_type=None, nested_data_definition=None, length=None, validator=None):
+                    nested=False, sub_item_data_type=None, nested_data_definition=None, length=None, validator=None
+                    , regex_error_message=None):
         try:
             value = cls.type_converter(value, data_type)
         except Exception:
@@ -85,7 +86,8 @@ class ParamValidator:
                         value[i] = list_item
                     except Exception:
                         raise HTTPExceptionBadRequest(f"{key} should be of {data_type} of {sub_item_data_type}")
-                    cls.check_value_constraint(list_item, key, min_val, max_val, allowed_value_list, regex, length)
+                    cls.check_value_constraint(list_item, key, min_val, max_val, allowed_value_list, regex, length,
+                                               regex_error_message)
             elif nested_data_definition:
                 if data_type is dict:
                     value = cls.parser(value, nested_data_definition, key)
@@ -96,12 +98,13 @@ class ParamValidator:
                         temp_list.append(list_item)
                     value = temp_list
         else:
-            cls.check_value_constraint(value, key, min_val, max_val, allowed_value_list, regex, length)
+            cls.check_value_constraint(value, key, min_val, max_val, allowed_value_list, regex, length,
+                                       regex_error_message)
         return value
 
     @staticmethod
     def check_value_constraint(value, key, min_val=None, max_val=None, allowed_value_list=None, regex=None,
-                               length=None):
+                               length=None, regex_error_message=None):
         if min_val and value < min_val:
             raise HTTPExceptionBadRequest(f"{key} should be greater than or equal to {min_val}")
         if max_val and value > max_val:
@@ -109,7 +112,10 @@ class ParamValidator:
         if allowed_value_list and value not in allowed_value_list:
             raise HTTPExceptionBadRequest(f"{key} should be one of these - {allowed_value_list}")
         if regex and re.search(regex, value) is None:
-            raise HTTPExceptionBadRequest(f"{key} should be of format - {regex}")
+            if regex_error_message:
+                raise HTTPExceptionBadRequest(f"{key} {regex_error_message}")
+            else:
+                raise HTTPExceptionBadRequest(f"{key} should be of format - {regex}")
         if length and length > len(value):
             raise HTTPExceptionBadRequest(f"{key} cannot exceed the length of - {length}")
 

@@ -1,8 +1,10 @@
-import Select from "./select";
-import Input from './input'
-import Label from './label';
+import Select from "./Select";
+import Input from './Input'
+import Label from './Label';
 import Form from './Form'
 import Button from './Button';
 import Error from './Error';
 
-export { Select, Input, Label, Form, Button, Error };
+import PreviewLabel from "./PreviewLabel";
+
+export { Select, Input, Label, Form, Button, Error, PreviewLabel };

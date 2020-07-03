@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 
-import Label from './label';
+import Label from './Label';
 
 class Select extends Component {
 

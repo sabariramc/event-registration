@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 
-import { Form, Button } from "../common";
+import { Form, Button, PreviewLabel } from "../common";
 
 class UserForm extends Component {
     render() {
@@ -11,21 +11,11 @@ class UserForm extends Component {
                 <div>
                     <img src={previewFile} ></img>
                 </div>
-                <div>
-                    <label>Name:</label><span>{name}</span>
-                </div>
-                <div>
-                    <label>Email Address:</label><span>{email_address}</span>
-                </div>
-                <div>
-                    <label>Mobile Number:</label><span>{mobile_number}</span>
-                </div>
-                <div>
-                    <label>Registrataion Type:</label><span>{registration_type}</span>
-                </div>
-                <div>
-                    <label>No of Tickets:</label><span>{no_of_ticket}</span>
-                </div>
+                <PreviewLabel name="Name" value={name} />
+                <PreviewLabel name="Email Address" value={email_address} />
+                <PreviewLabel name="Mobile Number" value={mobile_number} />
+                <PreviewLabel name="Registrataion Type" value={registration_type} />
+                <PreviewLabel name="No of Tickets" value={no_of_ticket} />
                 <Button type="submit">Submit</Button>
             </Form>
         )

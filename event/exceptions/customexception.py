@@ -10,9 +10,8 @@ class HTTPException(Exception):
 
     def __init__(self, code, message, data):
         self.code = code
-        self.message = message
         self.data = data
-        super(HTTPException, self).__init__()
+        super().__init__(message)
 
 
 class HTTPExceptionClientError(HTTPException):

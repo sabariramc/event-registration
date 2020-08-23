@@ -9,6 +9,7 @@ from datetime import date
 from uuid import uuid4
 import os
 import shutil
+from time import sleep
 
 from flask import request, current_app
 from flask_restful import Resource
@@ -86,6 +87,7 @@ class RegistrationList(Resource):
 class RegistrationType(Resource):
 
     def get(self):
+        sleep(10)
         registration_type = current_app.enums.REGISTRATION_TYPE._asdict()
         return [{"key": key, "value": value[1]} for key, value in registration_type.items()]
 
